@@ -314,10 +314,56 @@ CREATE TABLE enrollment (
 
 ---
 
-## ✅ Quick Summary
+## What is anomalies?
+
+Anomalies in databases refer to inconsistencies or unexpected issues that can occur during data manipulation or retrieval.
+
+There are three main types of anomalies:
+- Update Anomalies
+- Delete Anomalies
+- Insert Anomalies
+
+## What is functional dependency?
+
+Functional dependency in simple terms means that the value of one attribute (or set of attributes) uniquely determines the value of another attribute(s) in a table.
+
+## What is normal forms?
+
+A set of rules applied to a database table to reduce redundancy and avoid anomalies in data by organizing it properly.
+
+There is 4 kind of normal forms:
+- 0NF
+- 1NF
+- 2NF
+- 3NF
+
+## Rules of 1NF
+
+- Atomic Values
+- Unique Column Names
+- Positional dependency of data
+- Column should contain data that are of the same type
+- Determine Primary key
+
+## Rules of 2NF
+
+- Must be in 1NF
+- No non-key attribute should depend on part of a candidate key
+
+## Rules of 3NF
+
+- Must be in 2NF
+- Must not contain transitive dependency
+
+## What is transitive dependency?
+
+In a table if tow of abreast column that are non-key attribute and have functional dependency then it's a transitive dependency.
+
+
+<!-- ## ✅ Quick Summary
 
 - **Data** is raw facts; **information** is data with meaning.
 - A **primary key** is chosen from the **candidate keys**; the rest are **alternate keys**.
 - A **foreign key** links one table to another.
 - The **SDLC** has six phases: Planning → Analysis → System Design → Building → Testing → Deployment.
-- Database design steps: **entities → attributes → relationships → resolve many-to-many**.
+- Database design steps: **entities → attributes → relationships → resolve many-to-many**. -->
