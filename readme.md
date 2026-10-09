@@ -359,11 +359,6 @@ There is 4 kind of normal forms:
 
 In a table if tow of abreast column that are non-key attribute and have functional dependency then it's a transitive dependency.
 
+## What is SQL
 
-<!-- ## ✅ Quick Summary
-
-- **Data** is raw facts; **information** is data with meaning.
-- A **primary key** is chosen from the **candidate keys**; the rest are **alternate keys**.
-- A **foreign key** links one table to another.
-- The **SDLC** has six phases: Planning → Analysis → System Design → Building → Testing → Deployment.
-- Database design steps: **entities → attributes → relationships → resolve many-to-many**. -->
+SQL stands for Structured Query Language. The language we use to talk with databases.
