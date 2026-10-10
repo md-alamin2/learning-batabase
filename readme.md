@@ -738,3 +738,440 @@ FROM students;
 **Author:** MD. Al-amin
 
 **Topic:** SQL / PostgreSQL Data Types
+
+# SQL Constraints (PostgreSQL)
+
+## 📌 Introduction
+
+SQL constraints are rules applied to table columns or entire tables to ensure the accuracy, validity, and integrity of data stored in a database.
+
+Constraints prevent invalid data from being inserted, updated, or maintained in a table.
+
+For example:
+- A username must be unique.
+- An email address cannot be empty.
+- A student's age must be at least 18.
+- Every student must have a unique ID.
+
+PostgreSQL supports several types of constraints to enforce these rules.
+
+---
+
+## 1. NOT NULL Constraint
+
+The `NOT NULL` constraint ensures that a column cannot store a `NULL` value.
+
+### Example
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100)
+);
+```
+
+Here, `username` must contain a non-`NULL` value, but `email` may be `NULL`.
+
+### Invalid Example
+
+```sql
+INSERT INTO students (username, email)
+VALUES (NULL, 'alamin@example.com');
+```
+
+**Result:** PostgreSQL rejects the insertion because `username` cannot be `NULL`.
+
+**Remember:** `NULL` is different from an empty string (`''`) or zero (`0`).
+
+---
+
+## 2. UNIQUE Constraint
+
+The `UNIQUE` constraint ensures that values in a column or combination of columns do not duplicate one another.
+
+### Example
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    email VARCHAR(100) UNIQUE
+);
+```
+
+In this example:
+- Every non-`NULL` username must be unique.
+- Every non-`NULL` email must be unique.
+- Multiple `NULL` values are allowed by default in PostgreSQL's `UNIQUE` constraint.
+
+### Invalid Example
+
+```sql
+INSERT INTO users (username, email)
+VALUES ('alamin', 'alamin@example.com');
+
+INSERT INTO users (username, email)
+VALUES ('alamin', 'another@example.com');
+```
+
+**Result:** The second insertion fails because the username already exists.
+
+**Remember:** Use `NOT NULL UNIQUE` when a value must be both present and unique.
+
+---
+
+## 3. PRIMARY KEY Constraint
+
+The `PRIMARY KEY` constraint uniquely identifies every row in a table.
+
+A primary key:
+- Must contain unique values.
+- Cannot contain `NULL`.
+- Can consist of one column or multiple columns.
+- Allows only one primary key constraint per table, although that key can contain multiple columns.
+
+### Example
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL
+);
+```
+
+Here, `id` uniquely identifies each student.
+
+### Composite Primary Key Example
+
+A composite primary key uses more than one column.
+
+```sql
+CREATE TABLE enrollments (
+    student_id INTEGER,
+    course_id INTEGER,
+    PRIMARY KEY (student_id, course_id)
+);
+```
+
+The combination of `student_id` and `course_id` must be unique.
+
+For example, a student cannot have the same course enrollment recorded twice, but different students can enroll in the same course.
+
+---
+
+## 4. FOREIGN KEY Constraint
+
+The `FOREIGN KEY` constraint maintains referential integrity between related tables.
+
+It ensures that a referenced value exists in the related table, subject to the foreign key's rules.
+
+### Example
+
+```sql
+CREATE TABLE departments (
+    id SERIAL PRIMARY KEY,
+    department_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    employee_name VARCHAR(100) NOT NULL,
+    department_id INTEGER,
+    FOREIGN KEY (department_id)
+        REFERENCES departments(id)
+);
+```
+
+Here, `department_id` references `id` in the `departments` table.
+
+### How It Works
+
+Suppose the `departments` table contains:
+
+| id | department_name |
+|---:|---|
+| 1 | IT |
+| 2 | HR |
+
+The following insertion succeeds:
+
+```sql
+INSERT INTO employees (employee_name, department_id)
+VALUES ('Alamin', 1);
+```
+
+The following insertion fails if department `99` does not exist:
+
+```sql
+INSERT INTO employees (employee_name, department_id)
+VALUES ('Rahim', 99);
+```
+
+A foreign key can also define what happens when a referenced row is updated or deleted.
+
+Common actions include:
+
+- `ON DELETE CASCADE` — deletes related rows automatically.
+- `ON DELETE SET NULL` — sets the referencing column to `NULL`.
+- `ON DELETE RESTRICT` — prevents deletion when referencing rows exist.
+- `ON DELETE SET DEFAULT` — sets the referencing column to its default value.
+- `ON DELETE NO ACTION` — checks the constraint according to its enforcement rules; this is the default.
+
+Example:
+
+```sql
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    customer_id INTEGER REFERENCES customers(id)
+        ON DELETE CASCADE
+);
+```
+
+With `ON DELETE CASCADE`, deleting a customer also deletes that customer's referencing orders. Use it only when this behavior is appropriate.
+
+---
+
+## 5. CHECK Constraint
+
+The `CHECK` constraint ensures that a value satisfies a specified condition.
+
+### Example
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    age SMALLINT CHECK (age >= 18),
+    cgpa NUMERIC(3, 2) CHECK (cgpa >= 0 AND cgpa <= 4.00)
+);
+```
+
+Here:
+- `age` must be at least 18 when it is not `NULL`.
+- `cgpa` must be between `0` and `4.00` when it is not `NULL`.
+
+### Invalid Example
+
+```sql
+INSERT INTO students (username, age, cgpa)
+VALUES ('Alamin', 16, 3.75);
+```
+
+**Result:** The insertion fails because the age violates the check constraint.
+
+**Important:** A `CHECK` constraint passes when its expression evaluates to `TRUE` or `NULL`. If the value is required, combine `CHECK` with `NOT NULL`.
+
+---
+
+## 6. DEFAULT Constraint
+
+The `DEFAULT` constraint provides a value automatically when an `INSERT` statement omits that column or explicitly uses the `DEFAULT` keyword.
+
+### Example
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Insert a user:
+
+```sql
+INSERT INTO users (username)
+VALUES ('Alamin');
+```
+
+PostgreSQL automatically assigns:
+- `TRUE` to `is_active`.
+- The current timestamp to `created_at`.
+
+**Remember:** A default does not automatically replace an explicitly supplied `NULL`. If the column also has `NOT NULL`, inserting `NULL` is rejected.
+
+---
+
+## 7. Combining Multiple Constraints
+
+You can apply multiple constraints to the same column.
+
+### Example
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    age SMALLINT NOT NULL CHECK (age >= 18),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+```
+
+This table enforces the following rules:
+
+| Column | Constraint | Purpose |
+|---|---|---|
+| `id` | `PRIMARY KEY` | Uniquely identifies each student |
+| `username` | `NOT NULL`, `UNIQUE` | Required and unique username |
+| `email` | `NOT NULL`, `UNIQUE` | Required and unique email |
+| `age` | `NOT NULL`, `CHECK` | Required age of at least 18 |
+| `is_active` | `NOT NULL`, `DEFAULT` | Defaults to `TRUE` |
+
+---
+
+## 8. Column-Level vs. Table-Level Constraints
+
+Constraints can be defined at the column level or the table level.
+
+### Column-Level Constraint
+
+Defined directly after a column's data type.
+
+```sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    price NUMERIC(10, 2) CHECK (price >= 0)
+);
+```
+
+### Table-Level Constraint
+
+Defined separately after the column declarations.
+
+```sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100),
+    price NUMERIC(10, 2),
+    CONSTRAINT positive_price CHECK (price >= 0)
+);
+```
+
+Table-level constraints are especially useful for composite keys and rules involving multiple columns.
+
+### Example: Composite UNIQUE Constraint
+
+```sql
+CREATE TABLE course_registrations (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL,
+    course_id INTEGER NOT NULL,
+    CONSTRAINT unique_student_course
+        UNIQUE (student_id, course_id)
+);
+```
+
+This prevents the same student from registering for the same course more than once.
+
+---
+
+## 9. Naming Constraints
+
+You can assign names to constraints using the `CONSTRAINT` keyword.
+
+```sql
+CREATE TABLE accounts (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    balance NUMERIC(10, 2),
+    CONSTRAINT unique_account_email UNIQUE (email),
+    CONSTRAINT non_negative_balance CHECK (balance >= 0)
+);
+```
+
+Meaning:
+- `unique_account_email` is the name of the unique constraint.
+- `non_negative_balance` is the name of the check constraint.
+
+Naming constraints makes it easier to identify, modify, and remove them later.
+
+---
+
+## 10. Adding and Removing Constraints
+
+PostgreSQL allows you to modify constraints on an existing table.
+
+### Add a Constraint
+
+```sql
+ALTER TABLE students
+ADD CONSTRAINT check_student_age
+CHECK (age >= 18);
+```
+
+### Add a Foreign Key
+
+```sql
+ALTER TABLE employees
+ADD CONSTRAINT fk_department
+FOREIGN KEY (department_id)
+REFERENCES departments(id);
+```
+
+### Remove a Constraint
+
+```sql
+ALTER TABLE students
+DROP CONSTRAINT check_student_age;
+```
+
+**Note:** PostgreSQL generally requires the constraint's name when dropping a constraint. The automatically generated name may differ from the name you expect, so check the actual name if necessary.
+
+---
+
+## 11. SQL Constraints Quick Reference
+
+| Constraint | Purpose |
+|---|---|
+| `NOT NULL` | Prevents `NULL` values |
+| `UNIQUE` | Prevents duplicate non-`NULL` values by default |
+| `PRIMARY KEY` | Uniquely identifies each row and disallows `NULL` |
+| `FOREIGN KEY` | Enforces relationships between tables |
+| `CHECK` | Enforces a condition on values |
+| `DEFAULT` | Supplies a default value when a value is omitted |
+
+---
+
+## 12. Practice Example
+
+Try creating a `books` table with the following requirements:
+
+1. `id` must be an auto-incrementing primary key.
+2. `title` must not be `NULL`.
+3. `isbn` must be unique and required.
+4. `price` must not be negative.
+5. `available` must default to `TRUE`.
+6. `published_year` must be between 1450 and 2100 when provided.
+
+### Solution
+
+```sql
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    isbn VARCHAR(20) NOT NULL UNIQUE,
+    price NUMERIC(10, 2) CHECK (price >= 0),
+    available BOOLEAN NOT NULL DEFAULT TRUE,
+    published_year INTEGER
+        CHECK (published_year BETWEEN 1450 AND 2100)
+);
+```
+
+Try inserting valid and invalid records to see how PostgreSQL enforces these rules.
+
+---
+
+## 📚 Resources
+
+- [PostgreSQL Official Documentation — Constraints](https://www.postgresql.org/docs/current/ddl-constraints.html)
+- [PostgreSQL Official Documentation — CREATE TABLE](https://www.postgresql.org/docs/current/sql-createtable.html)
+- [PostgreSQL Official Documentation — ALTER TABLE](https://www.postgresql.org/docs/current/sql-altertable.html)
+
+---
+
+**Author:** MD. Al-amin
+
+**Topic:** SQL / PostgreSQL Constraints
