@@ -362,3 +362,379 @@ In a table if tow of abreast column that are non-key attribute and have function
 ## What is SQL
 
 SQL stands for Structured Query Language. The language we use to talk with databases.
+
+# SQL Data Types (PostgreSQL)
+
+## 📌 Introduction
+
+SQL data types define what kind of data a column can store in a database table. Choosing the correct data type helps maintain data accuracy, data integrity, and efficient storage.
+
+For example:
+- `INTEGER` stores whole numbers.
+- `VARCHAR` stores variable-length text.
+- `BOOLEAN` stores `TRUE` or `FALSE`.
+- `DATE` stores dates.
+
+---
+
+## 1. Numeric Data Types
+
+Numeric data types are used to store numbers.
+
+| Data Type | Description | Example |
+|---|---|---|
+| `SMALLINT` | Small-range whole numbers | `25` |
+| `INTEGER` or `INT` | Whole numbers | `1000` |
+| `BIGINT` | Large whole numbers | `9000000000` |
+| `DECIMAL(p, s)` | Exact decimal values | `99.99` |
+| `NUMERIC(p, s)` | Exact decimal values | `1234.56` |
+| `REAL` | Single-precision floating-point numbers | `3.14` |
+| `DOUBLE PRECISION` | Double-precision floating-point numbers | `3.1415926535` |
+| `SMALLSERIAL` | Auto-incrementing small integer | `1, 2, 3` |
+| `SERIAL` | Auto-incrementing integer | `1, 2, 3` |
+| `BIGSERIAL` | Auto-incrementing large integer | `1, 2, 3` |
+
+### Example
+
+```sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    price NUMERIC(10, 2),
+    quantity INTEGER
+);
+```
+
+**Note:** `NUMERIC(10, 2)` allows up to 10 digits in total, including 2 digits after the decimal point.
+
+---
+
+## 2. Character and String Data Types
+
+These data types store text.
+
+| Data Type | Description | Example |
+|---|---|---|
+| `CHAR(n)` | Fixed-length character string | `'ABC'` |
+| `VARCHAR(n)` | Variable-length string with a maximum length | `'Alamin'` |
+| `TEXT` | Variable-length text without a declared length limit | `'Hello World'` |
+
+### Example
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    gender CHAR(1),
+    bio TEXT
+);
+```
+
+**Difference:**
+- `CHAR(n)` is fixed-length and space-padded when necessary.
+- `VARCHAR(n)` has a maximum length.
+- `TEXT` is suitable for text without a specific declared length limit.
+
+---
+
+## 3. Boolean Data Type
+
+The `BOOLEAN` data type stores logical values.
+
+| Value | Meaning |
+|---|---|
+| `TRUE` | True |
+| `FALSE` | False |
+| `NULL` | Unknown or missing value |
+
+### Example
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    is_active BOOLEAN DEFAULT TRUE
+);
+```
+
+Insert data:
+
+```sql
+INSERT INTO users (username, is_active)
+VALUES ('Alamin', TRUE);
+```
+
+---
+
+## 4. Date and Time Data Types
+
+These types store dates and times.
+
+| Data Type | Description | Example |
+|---|---|---|
+| `DATE` | Date only | `'2026-10-10'` |
+| `TIME` | Time without time zone | `'14:30:00'` |
+| `TIME WITH TIME ZONE` | Time with time zone information | `'14:30:00+06'` |
+| `TIMESTAMP` | Date and time without time zone | `'2026-10-10 14:30:00'` |
+| `TIMESTAMPTZ` | Timestamp with time zone semantics | `'2026-10-10 14:30:00+06'` |
+| `INTERVAL` | A duration of time | `'2 days'` |
+
+### Example
+
+```sql
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    event_name VARCHAR(100),
+    event_date DATE,
+    start_time TIME,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Note:** PostgreSQL stores `TIMESTAMPTZ` values internally as instants in time and displays them according to the session time zone.
+
+---
+
+## 5. Binary Data Type
+
+### `BYTEA`
+
+The `BYTEA` data type stores binary data as a sequence of bytes.
+
+It can be used for:
+- Binary files
+- Image data
+- Other raw binary content
+
+### Example
+
+```sql
+CREATE TABLE files (
+    id SERIAL PRIMARY KEY,
+    file_name VARCHAR(100),
+    file_data BYTEA
+);
+```
+
+For many applications, files are stored in external storage, while their URLs or paths are saved in the database.
+
+---
+
+## 6. JSON Data Types
+
+PostgreSQL supports JSON data.
+
+| Data Type | Description |
+|---|---|
+| `JSON` | Stores JSON text and preserves its original formatting and key order |
+| `JSONB` | Stores JSON in a decomposed binary format, generally better for querying and indexing |
+
+### Example
+
+```sql
+CREATE TABLE user_profiles (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    details JSONB
+);
+```
+
+Insert data:
+
+```sql
+INSERT INTO user_profiles (username, details)
+VALUES (
+    'Alamin',
+    '{"city": "Dhaka", "country": "Bangladesh"}'
+);
+```
+
+Query JSON data:
+
+```sql
+SELECT details ->> 'city' AS city
+FROM user_profiles;
+```
+
+---
+
+## 7. UUID Data Type
+
+`UUID` stands for Universally Unique Identifier. It stores a 128-bit identifier.
+
+It is useful when unique IDs should not be simple sequential integers.
+
+### Example
+
+```sql
+CREATE TABLE customers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL
+);
+```
+
+PostgreSQL supports UUID generation through `gen_random_uuid()`.
+
+---
+
+## 8. Array Data Type
+
+PostgreSQL allows columns to store arrays of values of the same element type.
+
+### Example
+
+```sql
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    course_name VARCHAR(100),
+    tags TEXT[]
+);
+```
+
+Insert data:
+
+```sql
+INSERT INTO courses (course_name, tags)
+VALUES (
+    'PostgreSQL Basics',
+    ARRAY['SQL', 'Database', 'Backend']
+);
+```
+
+Access an array element:
+
+```sql
+SELECT tags[1]
+FROM courses;
+```
+
+**Note:** PostgreSQL arrays are one-based by default, so the first element is at index `1`.
+
+---
+
+## 9. Special Data Types
+
+PostgreSQL also supports several specialized data types.
+
+| Data Type | Description |
+|---|---|
+| `ENUM` | A predefined set of allowed values |
+| `INET` | An IPv4 or IPv6 host address |
+| `CIDR` | An IPv4 or IPv6 network address |
+| `MACADDR` | A MAC address |
+| `POINT` | A geometric point |
+| `XML` | XML data |
+
+### Example: ENUM
+
+```sql
+CREATE TYPE order_status AS ENUM (
+    'pending',
+    'shipped',
+    'delivered',
+    'cancelled'
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    status order_status DEFAULT 'pending'
+);
+```
+
+The `status` column accepts only the values defined in the `order_status` type.
+
+---
+
+## 10. SQL Data Types Quick Reference
+
+| Requirement | Recommended Type |
+|---|---|
+| Whole numbers | `INTEGER` |
+| Very large whole numbers | `BIGINT` |
+| Money-like exact decimal calculations | `NUMERIC(p, s)` |
+| Short text with a maximum length | `VARCHAR(n)` |
+| Long text | `TEXT` |
+| True/false values | `BOOLEAN` |
+| Birth date | `DATE` |
+| Event date and time | `TIMESTAMPTZ` |
+| Unique identifier | `UUID` |
+| JSON documents | `JSONB` |
+| Arrays of values | `TEXT[]`, `INTEGER[]`, etc. |
+| Binary data | `BYTEA` |
+
+---
+
+## 11. Complete Example
+
+The following example combines several common PostgreSQL data types.
+
+```sql
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    age SMALLINT CHECK (age >= 18),
+    cgpa NUMERIC(3, 2),
+    is_active BOOLEAN DEFAULT TRUE,
+    birth_date DATE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    skills TEXT[]
+);
+```
+
+Insert a student:
+
+```sql
+INSERT INTO students (
+    username,
+    email,
+    age,
+    cgpa,
+    birth_date,
+    skills
+)
+VALUES (
+    'alamin',
+    'alamin@example.com',
+    22,
+    3.75,
+    '2004-01-15',
+    ARRAY['HTML', 'CSS', 'JavaScript']
+);
+```
+
+Retrieve the data:
+
+```sql
+SELECT *
+FROM students;
+```
+
+---
+
+## 12. Important Notes
+
+- Choose data types according to the data you need to store.
+- Use `NOT NULL` when a column must always contain a value.
+- Use `UNIQUE` to prevent duplicate values.
+- Use `CHECK` to enforce conditions on values.
+- Use `DEFAULT` to provide a value when one is not supplied.
+- Use `PRIMARY KEY` to uniquely identify each row.
+- Use `SERIAL` for a convenient auto-incrementing integer in PostgreSQL; identity columns are the SQL-standard alternative.
+- `NULL` represents an unknown or missing value, not zero or an empty string.
+- PostgreSQL's available types and their behavior may differ from MySQL, SQL Server, and other database systems.
+
+---
+
+## 📚 Resources
+
+- [PostgreSQL Official Documentation — Data Types](https://www.postgresql.org/docs/current/datatype.html)
+- [PostgreSQL Official Documentation — Numeric Types](https://www.postgresql.org/docs/current/datatype-numeric.html)
+- [PostgreSQL Official Documentation — Character Types](https://www.postgresql.org/docs/current/datatype-character.html)
+- [PostgreSQL Official Documentation — Date/Time Types](https://www.postgresql.org/docs/current/datatype-datetime.html)
+
+---
+
+**Author:** MD. Al-amin
+
+**Topic:** SQL / PostgreSQL Data Types
