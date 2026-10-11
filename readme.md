@@ -1175,3 +1175,167 @@ Try inserting valid and invalid records to see how PostgreSQL enforces these rul
 **Author:** MD. Al-amin
 
 **Topic:** SQL / PostgreSQL Constraints
+
+
+# PostgreSQL ALTER TABLE Commands
+
+## Introduction
+
+In PostgreSQL, the `ALTER TABLE` command is used to modify the structure of an existing table. We can use it to rename tables, add or remove columns, rename columns, change data types, and add or remove constraints.
+
+## 1. Create a Table
+
+The `CREATE TABLE` command creates a new table in the database.
+
+```sql
+CREATE TABLE employe (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50),
+    age INT
+);
+```
+
+**Explanation:**
+- `id SERIAL PRIMARY KEY`: Creates an auto-incrementing ID and sets it as the primary key.
+- `name VARCHAR(50)`: Stores a name with a maximum length of 50 characters.
+- `age INT`: Stores an integer value representing age.
+
+## 2. Rename a Table
+
+The `RENAME TO` clause changes the name of an existing table.
+
+```sql
+ALTER TABLE employe
+RENAME TO employee;
+```
+
+**Explanation:** Renames the `employe` table to `employee`.
+
+## 3. Add a Column
+
+The `ADD COLUMN` clause adds a new column to an existing table.
+
+```sql
+ALTER TABLE employee
+ADD COLUMN email VARCHAR(50);
+```
+
+**Explanation:** Adds an `email` column that can store strings up to 50 characters long.
+
+## 4. Drop a Column
+
+The `DROP COLUMN` clause removes a column from a table.
+
+```sql
+ALTER TABLE employee
+DROP COLUMN email;
+```
+
+**Explanation:** Removes the `email` column from the `employee` table.
+
+**Note:** Dropping a column also removes the data stored in that column. This operation can be destructive.
+
+## 5. Rename a Column
+
+The `RENAME COLUMN` clause changes the name of an existing column.
+
+```sql
+ALTER TABLE employee
+RENAME COLUMN name TO user_name;
+```
+
+**Explanation:** Renames the `name` column to `user_name`.
+
+## 6. Modify a Column's Data Type
+
+The `ALTER COLUMN ... TYPE` clause changes the data type or size of a column.
+
+```sql
+ALTER TABLE employee
+ALTER COLUMN user_name TYPE VARCHAR(100);
+```
+
+**Explanation:** Changes the maximum length of the `user_name` column from 50 to 100 characters.
+
+**Note:** PostgreSQL may require a conversion if the existing data is incompatible with the new data type.
+
+## 7. Add a NOT NULL Constraint
+
+The `SET NOT NULL` clause prevents a column from containing `NULL` values.
+
+```sql
+ALTER TABLE employee
+ALTER COLUMN email
+SET NOT NULL;
+```
+
+**Explanation:** Ensures that every employee record must have a non-null value in the `email` column.
+
+**Important:** The command will fail if existing rows contain `NULL` values in the `email` column. Also, the column must exist before applying this constraint.
+
+## 8. Drop a NOT NULL Constraint
+
+The `DROP NOT NULL` clause allows a column to contain `NULL` values again.
+
+```sql
+ALTER TABLE employee
+ALTER COLUMN email
+DROP NOT NULL;
+```
+
+**Explanation:** Removes the `NOT NULL` restriction from the `email` column.
+
+## 9. Add a UNIQUE Constraint
+
+A `UNIQUE` constraint prevents duplicate values in a column or combination of columns.
+
+```sql
+ALTER TABLE employee
+ADD CONSTRAINT unique_employee_email
+UNIQUE (email);
+```
+
+**Explanation:**
+- `ADD CONSTRAINT`: Adds a new constraint to the table.
+- `unique_employee_email`: Names the constraint.
+- `UNIQUE (email)`: Prevents duplicate non-null email values.
+
+**Note:** PostgreSQL allows multiple `NULL` values under a standard `UNIQUE` constraint by default. Existing duplicate non-null email values must be resolved before this constraint can be added successfully.
+
+## 10. Drop a UNIQUE Constraint
+
+The `DROP CONSTRAINT` clause removes an existing table-level constraint.
+
+```sql
+ALTER TABLE employee
+DROP CONSTRAINT unique_employee_email;
+```
+
+**Explanation:** Removes the unique constraint named `unique_employee_email`, allowing duplicate email values again, provided no other constraint prevents them.
+
+## Summary
+
+| Operation | Command |
+|---|---|
+| Create a table | `CREATE TABLE` |
+| Rename a table | `RENAME TO` |
+| Add a column | `ADD COLUMN` |
+| Drop a column | `DROP COLUMN` |
+| Rename a column | `RENAME COLUMN` |
+| Modify a data type | `ALTER COLUMN ... TYPE` |
+| Add NOT NULL | `SET NOT NULL` |
+| Drop NOT NULL | `DROP NOT NULL` |
+| Add a constraint | `ADD CONSTRAINT` |
+| Drop a constraint | `DROP CONSTRAINT` |
+
+## Important Notes
+
+- `ALTER TABLE` modifies the structure of an existing table.
+- `ADD CONSTRAINT` is used to add constraints such as `UNIQUE`, `CHECK`, and `FOREIGN KEY`.
+- `SET NOT NULL` and `DROP NOT NULL` specifically modify a column's nullability.
+- Before dropping columns or constraints, make sure they are not needed by your application.
+- Execute the commands in the correct order because later commands may depend on earlier changes.
+
+## Conclusion
+
+The PostgreSQL `ALTER TABLE` command is essential for database schema management. Understanding these operations helps you maintain and update database tables without recreating them from scratch.
