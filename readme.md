@@ -1336,6 +1336,519 @@ DROP CONSTRAINT unique_employee_email;
 - Before dropping columns or constraints, make sure they are not needed by your application.
 - Execute the commands in the correct order because later commands may depend on earlier changes.
 
+
+# PostgreSQL SELECT Command
+
+The `SELECT` command is used to retrieve data from one or more tables in a database. It allows us to choose specific columns, filter records, sort results, remove duplicates, and perform calculations using built-in functions.
+
+## Table of Contents
+
+- [1. Basic SELECT](#1-basic-select)
+- [2. Column Aliases](#2-column-aliases)
+- [3. Sorting Data](#3-sorting-data)
+- [4. DISTINCT](#4-distinct)
+- [5. Filtering Data with WHERE](#5-filtering-data-with-where)
+- [6. AND Operator](#6-and-operator)
+- [7. OR Operator](#7-or-operator)
+- [8. Comparison Operators](#8-comparison-operators)
+- [9. BETWEEN Operator](#9-between-operator)
+- [10. IN Operator](#10-in-operator)
+- [11. LIKE and ILIKE Operators](#11-like-and-ilike-operators)
+- [12. NOT Operator](#12-not-operator)
+- [13. Scalar Functions](#13-scalar-functions)
+- [14. Aggregate Functions](#14-aggregate-functions)
+
+---
+
+## 1. Basic SELECT
+
+The `SELECT` statement retrieves data from a table.
+
+### Select Specific Columns
+
+Retrieve only the `first_name` and `email` columns from the `students` table.
+
+```sql
+SELECT
+    first_name,
+    email
+FROM
+    students;
+```
+
+### Select All Columns
+
+Use the asterisk (`*`) to retrieve all columns.
+
+```sql
+SELECT
+    *
+FROM
+    students;
+```
+
+**Explanation:**
+- `SELECT` specifies which columns to retrieve.
+- `FROM` specifies the table.
+- `*` represents all columns.
+
+## 2. Column Aliases
+
+Column aliases allow us to rename columns in the query results without changing the actual table structure.
+
+```sql
+SELECT
+    first_name AS "First Name",
+    age AS user_age
+FROM
+    students;
+```
+
+**Explanation:**
+- `AS` assigns an alias to a column.
+- Double quotes preserve spaces and capitalization in an alias, such as `"First Name"`.
+- Aliases make query results easier to read.
+
+## 3. Sorting Data
+
+The `ORDER BY` clause sorts query results in ascending or descending order.
+
+```sql
+SELECT
+    first_name,
+    age,
+    country
+FROM
+    students
+ORDER BY
+    student_id DESC;
+```
+
+**Sorting options:**
+
+- `ASC`: Ascending order (default).
+- `DESC`: Descending order.
+
+Example:
+
+```sql
+-- Sort students from youngest to oldest
+SELECT *
+FROM students
+ORDER BY age ASC;
+
+-- Sort students from oldest to youngest
+SELECT *
+FROM students
+ORDER BY age DESC;
+```
+
+## 4. DISTINCT
+
+The `DISTINCT` keyword removes duplicate values from the result.
+
+```sql
+SELECT DISTINCT
+    country
+FROM
+    students;
+```
+
+**Explanation:** If multiple students belong to the same country, that country appears only once in the result.
+
+## 5. Filtering Data with WHERE
+
+The `WHERE` clause filters records based on a specified condition.
+
+### Equal Operator (`=`)
+
+Find students from India.
+
+```sql
+SELECT *
+FROM students
+WHERE country = 'India';
+```
+
+Find students with an A grade in Physics.
+
+```sql
+SELECT *
+FROM students
+WHERE grade = 'A'
+  AND course = 'Physics';
+```
+
+Find students with the A+ blood group.
+
+```sql
+SELECT *
+FROM students
+WHERE blood_group = 'A+';
+```
+
+## 6. AND Operator
+
+The `AND` operator returns records only when **all specified conditions are true**.
+
+### Find students from Bangladesh whose age is 20
+
+```sql
+SELECT *
+FROM students
+WHERE country = 'Bangladesh'
+  AND age = 20;
+```
+
+### Find students from Bangladesh or India whose age is 20
+
+```sql
+SELECT *
+FROM students
+WHERE
+    (country = 'Bangladesh' OR country = 'India')
+    AND age = 20;
+```
+
+**Explanation:** Parentheses group conditions and help control how logical operators are evaluated.
+
+## 7. OR Operator
+
+The `OR` operator returns records when **at least one condition is true**.
+
+### Find students from Bangladesh or India
+
+```sql
+SELECT *
+FROM students
+WHERE country = 'Bangladesh'
+   OR country = 'India';
+```
+
+### Find students with grade A or B in Mathematics or Physics
+
+```sql
+SELECT *
+FROM students
+WHERE
+    (grade = 'A' OR grade = 'B')
+    AND
+    (course = 'Mathematics' OR course = 'Physics');
+```
+
+**Explanation:** The query matches students with either grade A or B and whose course is either Mathematics or Physics.
+
+## 8. Comparison Operators
+
+Comparison operators compare values in a condition.
+
+| Operator | Meaning |
+|---|---|
+| `=` | Equal to |
+| `<>` | Not equal to |
+| `!=` | Not equal to |
+| `>` | Greater than |
+| `<` | Less than |
+| `>=` | Greater than or equal to |
+| `<=` | Less than or equal to |
+
+### Find students aged 20 or older
+
+```sql
+SELECT *
+FROM students
+WHERE age >= 20;
+```
+
+### Find students younger than 20
+
+```sql
+SELECT *
+FROM students
+WHERE age < 20;
+```
+
+## 9. BETWEEN Operator
+
+The `BETWEEN` operator selects values within a specified range. Both boundary values are included.
+
+### Find students aged between 20 and 22
+
+```sql
+SELECT *
+FROM students
+WHERE age BETWEEN 20 AND 22;
+```
+
+This query includes students aged 20, 21, and 22.
+
+## 10. IN Operator
+
+The `IN` operator checks whether a value matches any value in a specified list.
+
+### Find students enrolled in Physics, Mathematics, or English
+
+```sql
+SELECT *
+FROM students
+WHERE course IN ('Physics', 'Mathematics', 'English');
+```
+
+This is a shorter alternative to writing multiple `OR` conditions.
+
+## 11. LIKE and ILIKE Operators
+
+The `LIKE` operator searches for a specified pattern. In PostgreSQL, `ILIKE` performs a case-insensitive pattern match.
+
+### Pattern matching wildcards
+
+| Wildcard | Meaning |
+|---|---|
+| `%` | Matches zero or more characters |
+| `_` | Matches exactly one character |
+
+### Find students whose first name starts with A
+
+```sql
+SELECT *
+FROM students
+WHERE first_name LIKE 'A%';
+```
+
+### Find students whose email starts with A, regardless of case
+
+```sql
+SELECT *
+FROM students
+WHERE email ILIKE 'A%';
+```
+
+### Find students whose last name ends with n
+
+```sql
+SELECT *
+FROM students
+WHERE last_name LIKE '%n';
+```
+
+**Explanation:**
+- `'A%'` matches values starting with A.
+- `'%n'` matches values ending with n.
+- `ILIKE` matches uppercase and lowercase variations, such as `A` and `a`.
+
+## 12. NOT Operator
+
+The `NOT` operator reverses a condition.
+
+### Find students whose grade is neither A+ nor A
+
+```sql
+SELECT *
+FROM students
+WHERE grade NOT IN ('A+', 'A');
+```
+
+This is equivalent to:
+
+```sql
+SELECT *
+FROM students
+WHERE NOT grade IN ('A+', 'A');
+```
+
+**Note:** SQL conditions involving `NULL` do not evaluate to true or false in the usual way. Rows with a `NULL` grade will not be returned by this query.
+
+---
+
+## 13. Scalar Functions
+
+Scalar functions operate on individual values and return a result for each row.
+
+### 13.1 UPPER()
+
+Converts a string to uppercase.
+
+```sql
+SELECT
+    UPPER(first_name),
+    first_name
+FROM students;
+```
+
+Example: `alamin` becomes `ALAMIN`.
+
+### 13.2 LOWER()
+
+Converts a string to lowercase.
+
+```sql
+SELECT
+    LOWER(first_name),
+    first_name
+FROM students;
+```
+
+Example: `ALAMIN` becomes `alamin`.
+
+### 13.3 CONCAT()
+
+Combines two or more strings into a single string.
+
+```sql
+SELECT
+    CONCAT(first_name, last_name) AS "Full Name"
+FROM students;
+```
+
+For a space between the first and last names, use:
+
+```sql
+SELECT
+    CONCAT(first_name, ' ', last_name) AS "Full Name"
+FROM students;
+```
+
+### 13.4 LENGTH()
+
+Returns the number of bytes in a string.
+
+```sql
+SELECT
+    LENGTH(first_name)
+FROM students;
+```
+
+For ordinary ASCII names, the result corresponds to the number of characters. For multibyte text, the byte count can differ from the character count.
+
+To count characters instead, use `CHAR_LENGTH()`:
+
+```sql
+SELECT
+    CHAR_LENGTH(first_name)
+FROM students;
+```
+
+### Scalar functions summary
+
+| Function | Purpose |
+|---|---|
+| `UPPER()` | Converts text to uppercase |
+| `LOWER()` | Converts text to lowercase |
+| `CONCAT()` | Combines strings |
+| `LENGTH()` | Returns the byte length of a string |
+| `CHAR_LENGTH()` | Returns the character length of a string |
+
+---
+
+## 14. Aggregate Functions
+
+Aggregate functions calculate a single result from a set of rows.
+
+### 14.1 AVG()
+
+Returns the average of numeric values.
+
+```sql
+SELECT
+    AVG(age)
+FROM students;
+```
+
+### 14.2 MAX()
+
+Returns the maximum value.
+
+```sql
+SELECT
+    MAX(age)
+FROM students;
+```
+
+### 14.3 MIN()
+
+Returns the minimum value.
+
+```sql
+SELECT
+    MIN(age)
+FROM students;
+```
+
+### 14.4 SUM()
+
+Returns the sum of numeric values.
+
+```sql
+SELECT
+    SUM(age)
+FROM students;
+```
+
+### 14.5 COUNT()
+
+Counts rows or non-NULL values, depending on the expression.
+
+Count all rows:
+
+```sql
+SELECT
+    COUNT(*)
+FROM students;
+```
+
+Count students with a non-NULL email:
+
+```sql
+SELECT
+    COUNT(email)
+FROM students;
+```
+
+**Explanation:**
+- `COUNT(*)` counts all rows.
+- `COUNT(email)` counts only rows where `email` is not `NULL`.
+- `AVG()`, `MAX()`, `MIN()`, and `SUM()` ignore `NULL` values.
+- `SUM()` and `AVG()` require numeric input.
+
+### Aggregate functions summary
+
+| Function | Purpose |
+|---|---|
+| `AVG()` | Calculates the average |
+| `MAX()` | Finds the maximum value |
+| `MIN()` | Finds the minimum value |
+| `SUM()` | Calculates the total |
+| `COUNT()` | Counts rows or non-NULL values |
+
+### Using Multiple Aggregate Functions
+
+You can use multiple aggregate functions in one query.
+
+```sql
+SELECT
+    COUNT(*) AS total_students,
+    AVG(age) AS average_age,
+    MAX(age) AS oldest_student,
+    MIN(age) AS youngest_student,
+    SUM(age) AS total_age
+FROM students;
+```
+
+This query returns one row containing all five calculated results.
+
+---
+
 ## Conclusion
 
-The PostgreSQL `ALTER TABLE` command is essential for database schema management. Understanding these operations helps you maintain and update database tables without recreating them from scratch.
+The PostgreSQL `SELECT` command is essential for retrieving and analyzing database records. By combining `WHERE`, `ORDER BY`, `DISTINCT`, logical operators, pattern matching, scalar functions, and aggregate functions, you can write flexible queries to retrieve meaningful information from a database.
+
+**Key takeaways:**
+
+- Use `SELECT` to retrieve data.
+- Use `WHERE` to filter records.
+- Use `ORDER BY` to sort results.
+- Use `DISTINCT` to remove duplicate results.
+- Use `AND`, `OR`, and `NOT` to combine or reverse conditions.
+- Use `LIKE` and `ILIKE` for pattern matching.
+- Use scalar functions to manipulate individual values.
+- Use aggregate functions to summarize data.
