@@ -2430,6 +2430,6 @@ Starting from data, keys, and normalization, we moved through the SDLC and ER de
 
 ---
 
-**Author:** MD. Al-amin
+**Author:** MD. Al-amin Hossain
 
 **Topics:** Databases · Keys · Normalization · SDLC · ER Design · SQL / PostgreSQL · Joins & Advanced Queries
